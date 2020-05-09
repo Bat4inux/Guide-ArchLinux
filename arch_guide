@@ -1,0 +1,178 @@
+##### Installation ArchLinux #####
+
+##### Guide de Bat4inux MAJ 08/05/20 virtualbox #####
+
+1) loadkeys fr-pc => le clavier en français.
+
+2) On va partitionner les disques.
+   fdisk /dev/sda
+
+   On tape "d" pour supprimer toutes les partitions et on enregistre avec "w".
+
+   On revient sur fdisk /dev/sda
+  
+   On crée une nouvelle table DOS en tapant "o" , ensuite on enregistre avec "w".
+   
+   On lance cfdisk.
+  
+   512M boot primary sda1.
+   
+   racine 10G primary sda2.
+  
+   4G swap primary sda3.
+  
+   Reste /home primary sda4.
+  
+   write puis yes puis quit.
+  
+3) On va formatter les partitions.
+   
+   mkfs.ext4 /dev/sda1 => partition 1.
+   mkfs.ext4 /dev/sda2 => partition 2.
+   mkfs.ext4 /dev/sda4 => partition 4.
+   
+   mkswap /dev/sda3.
+   swapon /dev/sda3.
+  
+4) On crée les points de montages .
+	mount /dev/sda2 /mnt
+	mkdir /mnt/{boot,home}
+	mount /dev/sda1 /mnt/boot
+	mount /dev/sda4 /mnt/home
+     
+5) Installation de la base.
+	pacstrap /mnt base base-devel linux linux-firmware nano dhcpcd dhclient syslinux
+  
+  
+6) On génére le fichier /etc/fstab 
+  
+   genfstab -U -p /mnt >> /mnt/etc/fstab
+   
+7) chroot
+   
+   arch-chroot /mnt
+  
+   echo ArchLinux > /etc/hostname 
+   
+   echo '127.0.0.1 ArchLinux.localdomain ArchLinux' >> /etc/hosts
+   
+   ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime
+   
+   Éditez le fichier /etc/locale.gen et décommentez votre locale
+   nano /etc/locale.gen
+   
+   fr_FR.UTF-8
+   
+   ctrl+x pour enregistrer les modifications
+   
+   Puis exécuter la commande
+   locale-gen
+   
+   echo LANG="fr_FR.UTF-8" > /etc/locale.conf=
+   
+   export LANG=fr_FR.UTF-8
+   
+   echo KEYMAP=fr > /etc/vconsole.conf 
+   
+   mkinitcpio -p linux
+   
+   mot de passe root : 
+   
+   passwd
+   
+   syslinux-install_update -iam
+   
+   nano /boot/syslinux/syslinux.cfg
+   à la ligne APPEND root=/dev/sda3 rw
+   on remplace sda3 par sda2
+   on enregistres avec ctrl+x
+   
+   systemctl enable dhcpcd
+   
+   pour quitter le chroot
+   ctrl+d
+   
+   umount -R /mnt
+   
+   reboot
+    
+   Boot existing OS => ArchLinux
+   
+   login root
+   
+8) On crée un utilisateur
+   useradd -G audio,disk,log,lp,optical,sys,systemd-journal,storage,wheel,video,network,power -m nom
+   
+   passwd nom
+   
+   alt+f2 si log user => ok
+   
+   alt+f1
+   
+   on va ajouter l'utilisateur au fichier sudoers
+   
+   nano /etc/sudoers
+   
+   dans ce fichier t'as une ligne root ALL=(ALL) ALL
+
+   en dessous de cette ligne on ajoute nom ALL=(ALL) ALL
+
+   puis on enregistre
+   
+   On vérifie la connexion internet avec un ping
+   
+   
+   on va installer xorg à présent
+
+   pacman -Syu xorg
+
+   il installera le groupe entier
+   
+   localectl set-keymap fr 
+   
+   nano /etc/pacman.conf
+   
+   # Misc options
+   #UseSyslog
+   #Color
+   #TotalDownload
+   #CheckSpace
+   #VerbosePkgLists
+
+   On a sa dans le fichier
+
+   Avec un dièse devant certaines lignes
+
+   On décommentes ces lignes et on enregistre.
+
+   On peut aussi activer le repo community
+   
+   pacman -S xf86-video-vesa
+   
+   pacman -S ttf-{bitstream-vera,liberation,freefont,dejavu} freetype2
+   
+   pacman -S virtualbox-guest-utils
+   
+   systemctl enable vboxservice 
+   
+   pascam -S plasma-desktop
+   
+   pacman -S git
+   
+   sudo pacman -S plasma kde-applications elisa digikam packagekit-qt5
+   
+   sudo localectl set-x11-keymap fr
+   
+   sudo systemctl start sddm
+   
+   puis en "konsole"
+   
+   systemctl enable sddm
+   
+   FIN :)
+   
+   
+   
+   
+   
+   
